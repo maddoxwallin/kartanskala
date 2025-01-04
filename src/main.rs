@@ -1,23 +1,26 @@
-//! Shows how to render a polygonal [`Mesh`], generated from a [`Rectangle`] primitive, in a 2D scene.
+use bevy_svg::prelude::*;
 
-use bevy::{color::palettes::basic::PURPLE, prelude::*};
+use bevy::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "SVG Plugin".to_string(),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }))
+        .add_plugins(bevy_svg::prelude::SvgPlugin)
         .add_systems(Startup, setup)
         .run();
 }
 
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    commands.spawn(Camera2d);
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let svg = asset_server.load("Zimbabwe.Svg");
+    commands.spawn((Camera2d::default(), Msaa::Sample4));
     commands.spawn((
-        Mesh2d(meshes.add(Rectangle::default())),
-        MeshMaterial2d(materials.add(Color::from(PURPLE))),
-        Transform::default().with_scale(Vec3::splat(128.)),
+        Svg2d(svg),
+        Origin::Center, // Origin::TopLeft is the default
     ));
 }
